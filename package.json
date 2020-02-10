@@ -1,0 +1,14 @@
+{
+  "name": "mrcp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "json-client.js",
+  "scripts": {
+    "test": "node_modules/jest/bin/jest.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^25.1.0"
+  }
+}
