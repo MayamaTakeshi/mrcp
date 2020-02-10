@@ -1,11 +1,13 @@
 # mrcp 
 
-A simple node.js MRCP (v.2) library.
+A simple node.js Media Resource Control Protocol (MRCPv2) library.
 
 To test it, run these:
 ```
-  node samples/mrcp_server.js
+  node samples/server.js
+```
 
-  node samples/mrcp_client.js
+```
+  node samples/client.js
 ```
 
