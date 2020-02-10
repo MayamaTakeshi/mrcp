@@ -77,9 +77,14 @@ const _parse_headers = (s, start, idx, data) => {
 }
 
 
-const parse_client_msg = (buf) => {
+const parse_client_msg = (msg) => {
 	var data = {}
-	var s = buf.toString('utf-8')
+	var s
+	if(Buffer.isBuffer(msg)) {
+		s = msg.toString('utf-8')
+	} else {
+		s = msg
+	}
 
 	var idx = s.indexOf("\r\n")
 	if(idx < 0) throw "Invalid MRCP message: no line terminators"
@@ -106,9 +111,14 @@ const parse_client_msg = (buf) => {
 	return data
 }
 
-const parse_server_msg = (buf) => {
+const parse_server_msg = (msg) => {
 	var data = {}
-	var s = buf.toString('utf-8')
+	var s
+	if(Buffer.isBuffer(msg)) {
+		s = msg.toString('utf-8')
+	} else {
+		s = msg
+	}
 
 	var idx = s.indexOf("\r\n")
 	if(idx < 0) throw "Invalid MRCP message: no line terminators"
