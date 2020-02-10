@@ -1,4 +1,4 @@
-const mb = require('../mrcp_builder.js');
+const mb = require('../src/mrcp_builder.js');
 
 test('calc_msg_len', () => {
 	expect(

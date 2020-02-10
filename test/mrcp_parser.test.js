@@ -1,4 +1,4 @@
-const mp = require('../mrcp_parser.js');
+const mp = require('../src/mrcp_parser.js');
 
 test('get_msg_len: Not MRCP message', () => {
 	expect(() => {
