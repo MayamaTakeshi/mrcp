@@ -1,13 +1,25 @@
 {
   "name": "mrcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MayamaTakeshi/mrcp.git"
+  },
+  "keywords": [
+    "Media",
+    "Resource",
+    "Control",
+    "Protocol",
+    "collection"
+  ],
   "scripts": {
     "test": "node_modules/jest/bin/jest.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "MayamaTakeshi",
+  "license": "MIT",
+  "homepage": "https://github.com/MayamaTakeshi/mrcp#readme",
   "devDependencies": {
     "jest": "^25.1.0"
   }
