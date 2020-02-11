@@ -20,7 +20,7 @@ const _join_headers = (headers) => {
 
 // Request message start-line:  MRCP/2.0 message-length method-name request-id
 const build_request = (method_name, request_id, headers, body) => {
-	var msg = `${method_name} ${request_id}\r\n${_join_headers(headers)}\r\n${body}`
+	var msg = `${method_name} ${request_id}\r\n${_join_headers(headers)}\r\n${body ? body : ''}`
 	var len = 10 + msg.length // 10 = MRCP/.20 + two spaces around message-length
 
 	var msg_len = calc_msg_len(len)
@@ -30,7 +30,7 @@ const build_request = (method_name, request_id, headers, body) => {
 
 // Response Message start-line: MRCP/2.0 message-length request-id status-code request-state
 const build_response = (request_id, status_code, request_state, headers, body) => {
-	var msg = `${request_id} ${status_code} ${request_state}\r\n${_join_headers(headers)}\r\n${body}`
+	var msg = `${request_id} ${status_code} ${request_state}\r\n${_join_headers(headers)}\r\n${body ? body : ''}`
 	var len = 10 + msg.length // 10 = MRCP/.20 + two spaces around message-length
 
 	var msg_len = calc_msg_len(len)
@@ -40,7 +40,7 @@ const build_response = (request_id, status_code, request_state, headers, body) =
 
 // Event Message start-line: MRCP/2.0 message-length event-name request-id request-state
 const build_event = (event_name, request_id, request_state, headers, body) => {
-	var msg = `${event_name} ${request_id} ${request_state}\r\n${_join_headers(headers)}\r\n${body}`
+	var msg = `${event_name} ${request_id} ${request_state}\r\n${_join_headers(headers)}\r\n${body ? body : ''}`
 	var len = 10 + msg.length // 10 = MRCP/.20 + two spaces around message-length
 
 	var msg_len = calc_msg_len(len)
