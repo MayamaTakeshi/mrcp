@@ -82,18 +82,25 @@ class MrcpSocket extends Duplex {
     while (!this._readingPaused) {
       // First step is finding the message length which is the second token in the start-line
 	  let minimum_bytes = 32
-      let buf = this._socket.read(minimum_bytes);
+      let buf = this._socket.read(minimum_bytes)
       if (!buf) return;
 
-      let len = mp.get_msg_len(buf);
+      let len
+	  try {
+	  	len = mp.get_msg_len(buf)
+      } catch(err) {
+	  	this._socket.destroy(err)
+		return
+	  }
+
       if(!len) {
-        this._socket.unshift(buf);
+        this._socket.unshift(buf)
 	  }
 
       // ensure that we don't exceed the max size of 256KiB (TODO: need to review this for MRCP)
       if (len > 2 ** 18) {
         this.socket.destroy(new Error('Max length exceeded'));
-        return;
+        return
       }
 
       // With the length, we can then consume the rest of the body.

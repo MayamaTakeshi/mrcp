@@ -8,7 +8,7 @@ let client = mrcp.createClient({
 var request_id = 1
 
 var intervalId = setInterval(() => {
-	msg = mrcp.builder.build_request('SPEAK', request_id, {'content-type': 'application/xml', 'content-length': 17}, "<root>test</root>")
+	msg = mrcp.builder.build_request('SPEAK', request_id, {'content-type': 'application/xml'}, "<root>test</root>")
 	msg = msg + msg + msg
 
 	console.log('Sending MRCP requests. result: ', client.write(msg))
