@@ -1,6 +1,6 @@
 {
   "name": "mrcp",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "",
   "main": "index.js",
   "repository": {
@@ -19,7 +19,10 @@
   "author": "MayamaTakeshi",
   "license": "MIT",
   "homepage": "https://github.com/MayamaTakeshi/mrcp#readme",
+  "dependencies": {
+    "jest": "^26.6.3"
+  },
   "devDependencies": {
-    "jest": "^25.1.0"
+    "node-notifier": "^8.0.1"
   }
 }
