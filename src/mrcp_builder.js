@@ -13,6 +13,8 @@ const calc_msg_len = (len) => {
 }
 
 const _join_headers = (headers) => {
+	if(!headers) return "";
+
 	return Object.keys(headers).map((key, index) => {
 		return `${key}: ${headers[key]}\r\n`
 	}).join("")
