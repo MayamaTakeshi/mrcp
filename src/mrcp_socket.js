@@ -116,12 +116,7 @@ class MrcpSocket extends Duplex {
 
       msg = Buffer.concat([buf, msg])
 
-      let parsed_msg;
-	  if(this._server_mode) {
-       	parsed_msg = mp.parse_client_msg(msg)
-      } else {
-	  	parsed_msg = mp.parse_server_msg(msg)
-      }
+      let parsed_msg = mp.parse_msg(msg)
      
       // Push the data into the read buffer and capture whether
       // we are hitting the back pressure limits

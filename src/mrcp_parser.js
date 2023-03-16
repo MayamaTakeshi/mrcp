@@ -76,8 +76,7 @@ const _parse_headers = (s, start, idx, data) => {
 	return start
 }
 
-
-const parse_client_msg = (msg) => {
+const parse_msg = (msg) => {
 	var data = {}
 	var s
 	if(Buffer.isBuffer(msg)) {
@@ -92,56 +91,30 @@ const parse_client_msg = (msg) => {
 	var start = 0
 	var start_line = s.substring(start, idx)
 	var m = start_line.match(reRequestLine)
-	if(!m) throw "Invalid MRCP start-line"
-
-	data.type = 'request'
-	data.version = m.groups.version
-	data.method = m.groups.method
-	data.request_id = parseInt(m.groups.request_id)
-	
-	start = idx + 2 // \r\n
-	idx = s.indexOf("\r\n", start)
-	data.headers = {}
-	start = _parse_headers(s, start, idx, data)
-	var body = s.substring(start)
-	if(body != "") {
-		data.body = body
-	}
-
-	return data
-}
-
-const parse_server_msg = (msg) => {
-	var data = {}
-	var s
-	if(Buffer.isBuffer(msg)) {
-		s = msg.toString('utf-8')
-	} else {
-		s = msg
-	}
-
-	var idx = s.indexOf("\r\n")
-	if(idx < 0) throw "Invalid MRCP message: no line terminators"
-
-	var start = 0
-	var start_line = s.substring(start, idx)
-	var m = start_line.match(reResponseLine)
-	if(m) {
-		data.type = 'response'
-		data.version = m.groups.version
-		data.request_id = parseInt(m.groups.request_id)
-		data.status_code = parseInt(m.groups.status_code)
-		data.request_state = m.groups.request_state
-	} else {
-		m = start_line.match(reEventLine)
-		if(m) {
-			data.type = 'event'
-			data.version = m.groups.version
-			data.event_name = m.groups.event_name
-			data.request_id = parseInt(m.groups.request_id)
-			data.request_state = m.groups.request_state
-		}
-	}
+    if(m) {
+        data.type = 'request'
+        data.version = m.groups.version
+        data.method = m.groups.method
+        data.request_id = parseInt(m.groups.request_id)
+    } else {
+        m = start_line.match(reResponseLine)
+        if(m) {
+            data.type = 'response'
+            data.version = m.groups.version
+            data.request_id = parseInt(m.groups.request_id)
+            data.status_code = parseInt(m.groups.status_code)
+            data.request_state = m.groups.request_state
+        } else {
+            m = start_line.match(reEventLine)
+            if(m) {
+                data.type = 'event'
+                data.version = m.groups.version
+                data.event_name = m.groups.event_name
+                data.request_id = parseInt(m.groups.request_id)
+                data.request_state = m.groups.request_state
+            }
+        }
+    }
 
 	if(!m) throw "Invalid MRCP start-line"
 
@@ -160,7 +133,6 @@ const parse_server_msg = (msg) => {
 
 module.exports = {
 	get_msg_len,
-	parse_client_msg,
-	parse_server_msg,
+    parse_msg,
 }
 

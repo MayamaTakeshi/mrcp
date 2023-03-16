@@ -48,25 +48,25 @@ test('get_msg_len: OK', () => {
 	).toBe(1024)
 })
 
-test('parse_client_msg', () => {
+test('parse_msg: request', () => {
 	expect(() => {
-		mp.parse_client_msg(Buffer.from("abcde"))
+		mp.parse_msg(Buffer.from("abcde"))
 	}).toThrow("Invalid MRCP message: no line terminators")
 
 	expect(() => {
-		mp.parse_client_msg(Buffer.from("MRCP/2.0 0 0 0\r\n"))
+		mp.parse_msg(Buffer.from("MRCP/2.0 0 0 0\r\n"))
 	}).toThrow("Invalid MRCP start-line")
 
 	expect(() => {
-		mp.parse_client_msg(Buffer.from("MRCP/2.0 1024 SPEAK 1\r\nsome-header: abc\r\ninvalid-header\r\n"))
+		mp.parse_msg(Buffer.from("MRCP/2.0 1024 SPEAK 1\r\nsome-header: abc\r\ninvalid-header\r\n"))
 	}).toThrow("Invalid MRCP header-line")
 
 	expect(() => {
-		mp.parse_client_msg(Buffer.from("MRCP/2.0 1024 SPEAK 1\r\nsome-header: abc\r\n  : defghi\r\n"))
+		mp.parse_msg(Buffer.from("MRCP/2.0 1024 SPEAK 1\r\nsome-header: abc\r\n  : defghi\r\n"))
 	}).toThrow("Invalid MRCP blank header-name")
 
 	expect(
-		mp.parse_client_msg(Buffer.from("MRCP/2.0 1024 SPEAK 1\r\nheader-one: abc\r\nHEADER-TWO: defghi\r\n"))
+		mp.parse_msg(Buffer.from("MRCP/2.0 1024 SPEAK 1\r\nheader-one: abc\r\nHEADER-TWO: defghi\r\n"))
 	).toEqual({
 		type: 'request',
 		version: '2.0',
@@ -79,7 +79,7 @@ test('parse_client_msg', () => {
 	})
 
 	expect(
-		mp.parse_client_msg(Buffer.from("MRCP/2.0 1024 SPEAK 1\r\nContent-Type: application/xml\r\nContent-Length: 18\r\n\r\n<root>hello</root>"))
+		mp.parse_msg(Buffer.from("MRCP/2.0 1024 SPEAK 1\r\nContent-Type: application/xml\r\nContent-Length: 18\r\n\r\n<root>hello</root>"))
 	).toEqual({
 		type: 'request',
 		version: '2.0',
@@ -93,26 +93,25 @@ test('parse_client_msg', () => {
 	})
 })
 
-
-test('parse_server_msg: response', () => {
+test('parse_msg: response', () => {
 	expect(() => {
-		mp.parse_server_msg(Buffer.from("abcde"))
+		mp.parse_msg(Buffer.from("abcde"))
 	}).toThrow("Invalid MRCP message: no line terminators")
 
 	expect(() => {
-		mp.parse_server_msg(Buffer.from("MRCP/2.0 0 0 0\r\n"))
+		mp.parse_msg(Buffer.from("MRCP/2.0 0 0 0\r\n"))
 	}).toThrow("Invalid MRCP start-line")
 
 	expect(() => {
-		mp.parse_server_msg(Buffer.from("MRCP/2.0 1024 1 200 SOME-STATE\r\nsome-header: abc\r\ninvalid-header\r\n"))
+		mp.parse_msg(Buffer.from("MRCP/2.0 1024 1 200 SOME-STATE\r\nsome-header: abc\r\ninvalid-header\r\n"))
 	}).toThrow("Invalid MRCP header-line")
 
 	expect(() => {
-		mp.parse_server_msg(Buffer.from("MRCP/2.0 1024 123 200 SOME-STATE\r\nsome-header: abc\r\n  : defghi\r\n"))
+		mp.parse_msg(Buffer.from("MRCP/2.0 1024 123 200 SOME-STATE\r\nsome-header: abc\r\n  : defghi\r\n"))
 	}).toThrow("Invalid MRCP blank header-name")
 
 	expect(
-		mp.parse_server_msg(Buffer.from("MRCP/2.0 1024 5 200 SOME-STATE\r\nheader-one: abc\r\nHEADER-TWO: defghi\r\n"))
+		mp.parse_msg(Buffer.from("MRCP/2.0 1024 5 200 SOME-STATE\r\nheader-one: abc\r\nHEADER-TWO: defghi\r\n"))
 	).toEqual({
 		type: 'response',
 		version: '2.0',
@@ -126,7 +125,7 @@ test('parse_server_msg: response', () => {
 	})
 
 	expect(
-		mp.parse_server_msg(Buffer.from("MRCP/2.0 1024 12 200 SOME-STATE\r\nContent-Type: application/xml\r\nContent-Length: 18\r\n\r\n<root>hello</root>"))
+		mp.parse_msg(Buffer.from("MRCP/2.0 1024 12 200 SOME-STATE\r\nContent-Type: application/xml\r\nContent-Length: 18\r\n\r\n<root>hello</root>"))
 	).toEqual({
 		type: 'response',
 		version: '2.0',
@@ -141,10 +140,9 @@ test('parse_server_msg: response', () => {
 	})
 })
 
-
-test('parse_server_msg: event', () => {
+test('parse_msg: event', () => {
 	expect(
-		mp.parse_server_msg(Buffer.from("MRCP/2.0 1024 RECOGNITION-COMPLETE 12345 COMPLETE\r\nContent-Type: application/xml\r\nContent-Length: 18\r\n\r\n<root>hello</root>"))
+		mp.parse_msg(Buffer.from("MRCP/2.0 1024 RECOGNITION-COMPLETE 12345 COMPLETE\r\nContent-Type: application/xml\r\nContent-Length: 18\r\n\r\n<root>hello</root>"))
 	).toEqual({
 		type: 'event',
 		version: '2.0',
@@ -158,6 +156,5 @@ test('parse_server_msg: event', () => {
 		body: "<root>hello</root>",
 	})
 })
-
 
 
