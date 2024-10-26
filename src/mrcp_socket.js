@@ -1,9 +1,9 @@
 // Based on code from http://derpturkey.com/extending-tcp-socket-in-node-js/
 
-const { Socket } = require('net');
-const { Duplex } = require('stream');
+const { Socket } = require("net");
+const { Duplex } = require("stream");
 
-const mp = require('./mrcp_parser.js')
+const mp = require("./mrcp_parser.js");
 
 class MrcpSocket extends Duplex {
   /**
@@ -29,7 +29,7 @@ class MrcpSocket extends Duplex {
       @type {Socket}
      */
     this._socket;
-	this._server_mode = server_mode;
+    this._server_mode = server_mode;
 
     // wrap the socket
     if (socket) this._wrapSocket(socket);
@@ -57,15 +57,15 @@ class MrcpSocket extends Duplex {
    */
   _wrapSocket(socket) {
     this._socket = socket;
-    this._socket.on('close', hadError => this.emit('close', hadError));
-    this._socket.on('connect', () => this.emit('connect'));
-    this._socket.on('drain', () => this.emit('drain'));
-    this._socket.on('end', () => this.emit('end'));
-    this._socket.on('error', err => this.emit('error', err));
+    this._socket.on("close", (hadError) => this.emit("close", hadError));
+    this._socket.on("connect", () => this.emit("connect"));
+    this._socket.on("drain", () => this.emit("drain"));
+    this._socket.on("end", () => this.emit("end"));
+    this._socket.on("error", (err) => this.emit("error", err));
     this._socket.on('lookup', (err, address, family, host) => this.emit('lookup', err, address, family, host)); // prettier-ignore
-    this._socket.on('ready', () => this.emit('ready'));
-    this._socket.on('timeout', () => this.emit('timeout'));
-    this._socket.on('readable', this._onReadable.bind(this));
+    this._socket.on("ready", () => this.emit("ready"));
+    this._socket.on("timeout", () => this.emit("timeout"));
+    this._socket.on("readable", this._onReadable.bind(this));
   }
 
   /**
@@ -81,26 +81,26 @@ class MrcpSocket extends Duplex {
     // 2. reading is paused because the consumer is slow
     while (!this._readingPaused) {
       // First step is finding the message length which is the second token in the start-line
-	  let minimum_bytes = 32
-      let buf = this._socket.read(minimum_bytes)
+      let minimum_bytes = 32;
+      let buf = this._socket.read(minimum_bytes);
       if (!buf) return;
 
-      let len
-	  try {
-	  	len = mp.get_msg_len(buf)
-      } catch(err) {
-	  	this._socket.destroy(err)
-		return
-	  }
+      let len;
+      try {
+        len = mp.get_msg_len(buf);
+      } catch (err) {
+        this._socket.destroy(err);
+        return;
+      }
 
-      if(!len) {
-        this._socket.unshift(buf)
-	  }
+      if (!len) {
+        this._socket.unshift(buf);
+      }
 
       // ensure that we don't exceed the max size of 256KiB (TODO: need to review this for MRCP)
       if (len > 2 ** 18) {
-        this.socket.destroy(new Error('Max length exceeded'));
-        return
+        this.socket.destroy(new Error("Max length exceeded"));
+        return;
       }
 
       // With the length, we can then consume the rest of the body.
@@ -114,10 +114,10 @@ class MrcpSocket extends Duplex {
         return;
       }
 
-      msg = Buffer.concat([buf, msg])
+      msg = Buffer.concat([buf, msg]);
 
-      let parsed_msg = mp.parse_msg(msg)
-     
+      let parsed_msg = mp.parse_msg(msg);
+
       // Push the data into the read buffer and capture whether
       // we are hitting the back pressure limits
       let pushOk = this.push(parsed_msg);
@@ -157,4 +157,3 @@ class MrcpSocket extends Duplex {
 }
 
 module.exports = MrcpSocket;
-
