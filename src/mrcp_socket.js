@@ -23,6 +23,8 @@ class MrcpSocket extends Duplex {
      */
     this._readingPaused = false;
 
+    this._buffer = Buffer.alloc(0);
+
     /**
       The underlying TCP Socket
       @private
@@ -76,55 +78,44 @@ class MrcpSocket extends Duplex {
     @private
    */
   _onReadable() {
-    // Read all the data until one of two conditions is met
-    // 1. there is nothing left to read on the socket
-    // 2. reading is paused because the consumer is slow
-    while (!this._readingPaused) {
-      // First step is finding the message length which is the second token in the start-line
-      let minimum_bytes = 32;
-      let buf = this._socket.read(minimum_bytes);
-      if (!buf) return;
+    const entireBuffer = this._socket.read();
 
-      let len;
-      try {
-        len = mp.get_msg_len(buf);
-      } catch (err) {
-        this._socket.destroy(err);
-        return;
+    if (entireBuffer && entireBuffer.length) {
+        // e.g. Logs 1022
+        console.log('Current entire buffer length', entireBuffer.length);
+        // Return the content we just read to not interfere with the upcoming code
+        this._socket.unshift(entireBuffer);
+    }
+
+    const chunk = this._socket.read();
+    if (chunk) {
+      this._buffer = Buffer.concat([this._buffer, chunk]);
+
+      // Check if there's enough data to determine message length
+      if (this._buffer.length >= 32) {
+        let len;
+        try {
+          len = mp.get_msg_len(this._buffer); // Determine message length
+        } catch (err) {
+          this._socket.destroy(err); // Handle parse error
+          return;
+        }
+
+        // If we have enough data for a full message, process it
+        if (this._buffer.length >= len) {
+          const message = this._buffer.slice(0, len); // Extract message
+          this._buffer = this._buffer.slice(len); // Remove processed message from buffer
+
+          try {
+            const parsedMessage = mp.parse_msg(message); // Parse the message
+            const pushOk = this.push(parsedMessage); // Push parsed message to the stream
+
+            if (!pushOk) this._readingPaused = true; // Handle backpressure
+          } catch (err) {
+            this._socket.destroy(err); // Handle parse error
+          }
+        }
       }
-
-      if (!len) {
-        this._socket.unshift(buf);
-      }
-
-      // ensure that we don't exceed the max size of 256KiB (TODO: need to review this for MRCP)
-      if (len > 2 ** 18) {
-        this.socket.destroy(new Error("Max length exceeded"));
-        return;
-      }
-
-      // With the length, we can then consume the rest of the body.
-      let msg = this._socket.read(len - minimum_bytes);
-
-      // If we did not have enough data on the wire to read the body
-      // we will wait for the body to arrive and push the length
-      // back into the socket's read buffer with unshift.
-      if (!msg) {
-        this._socket.unshift(buf);
-        return;
-      }
-
-      msg = Buffer.concat([buf, msg]);
-
-      let parsed_msg = mp.parse_msg(msg);
-
-      // Push the data into the read buffer and capture whether
-      // we are hitting the back pressure limits
-      let pushOk = this.push(parsed_msg);
-
-      // When the push fails, we need to pause the ability to read
-      // messages because the consumer is getting backed up.
-      if (!pushOk) this._readingPaused = true;
     }
   }
 
