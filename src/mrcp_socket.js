@@ -78,15 +78,6 @@ class MrcpSocket extends Duplex {
     @private
    */
   _onReadable() {
-    const entireBuffer = this._socket.read();
-
-    if (entireBuffer && entireBuffer.length) {
-        // e.g. Logs 1022
-        console.log('Current entire buffer length', entireBuffer.length);
-        // Return the content we just read to not interfere with the upcoming code
-        this._socket.unshift(entireBuffer);
-    }
-
     const chunk = this._socket.read();
     if (chunk) {
       this._buffer = Buffer.concat([this._buffer, chunk]);
